@@ -7,16 +7,22 @@
 -- select
 
 --   employees.employee_id,employees.first_name,employees.last_name
+SELECT count(*)
+FROM employees_schedule
+where day_id = 8
+having COUNT(*) > 0;
+SET @bd = '2022-07-15 15:00:00';
 
-SET @bd = '2022-07-11 09:00:00';
-
-set @kt = '2022-07-11 10:30:00';
+set @kt = '2022-07-15 15:01:00';
 
 SELECT
     employees.employee_id id,
     employees.first_name firstname,
     employees.last_name lastname
-FROM employees
+FROM employees, employees_schedule
+where employees.employee_id = employees_schedule.employee_id
+and employees_schedule.day_id = weekday(date(@bd))+1 and 
+employees_schedule.from_hour <= time(@bd) and time(@kt) <= employees_schedule.to_hour
 except
 SELECT
     employees.employee_id id,
