@@ -22,9 +22,9 @@ if (isset($_POST['getinfo']))
     $statistic = $result->fetch_all(MYSQLI_ASSOC);
     echo json_encode($statistic);
 }
-else if (isset($_GET['artist']))
+else if (isset($_GET['services']))
 {
-    $sql = "SELECT  employees.employee_id,  employees.first_name,  employees.last_name, COUNT(employees_schedule.day_id) FROM  employees,employees_schedule WHERE employees.employee_id = employees_schedule.employee_id GROUP by employees.employee_id,  employees.first_name,  employees.last_name; ";
+    $sql = "SELECT service_id,service_name , service_duration FROM services ";
     $result = $conn->query($sql);
     $rows = $result->fetch_all(MYSQLI_ASSOC);
     echo json_encode($rows);
