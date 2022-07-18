@@ -24,7 +24,7 @@ if (isset($_POST['getinfo']))
 }
 else if (isset($_GET['services']))
 {
-    $sql = "SELECT service_id,service_name , service_duration FROM services ";
+    $sql = "SELECT service_id id,service_name name, service_duration duration FROM services ";
     $result = $conn->query($sql);
     $rows = $result->fetch_all(MYSQLI_ASSOC);
     echo json_encode($rows);
@@ -36,7 +36,7 @@ else if (isset($_GET['selected_services']))
     {
         $appointment_date = date('Y-m-d');
         $availableDate = [];
-        while (count($availableDate) < 10)
+        while (count($availableDate) < 7)
         {
             $day_id = date('N', strtotime($appointment_date));
             $stmt = $conn->prepare("
@@ -54,14 +54,20 @@ else if (isset($_GET['selected_services']))
             }
             $appointment_date = date('Y-m-d', strtotime($appointment_date . ' +1 day'));
         }
-        $returnarr['AvailableDates'] = $availableDate;
+        $returnarr['availableDates'] = $availableDate;
     }
 
     //$_GET['option'] == "getTimeByDate"
     $DateForTimeSlot = $_GET['option'] == "getTimeByDate" ? $_GET['appointmentDate'] : $availableDate[0];
     $timearr = getTimeForDate($DateForTimeSlot);
-
-    $returnarr["timeslot_$DateForTimeSlot"] = $timearr;
+    if ($_GET['option'] == "getDateTime"){
+        $returnarr["initTimeSlot"] = $timearr;
+    }
+    else {
+        $returnarr = $timearr;
+    }
+  
+    
     echo json_encode($returnarr);
     //get time for a day
 }
