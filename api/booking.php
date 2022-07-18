@@ -1,7 +1,7 @@
 <?php
 include  __DIR__ . '/../includes/header.php';
 
-if (isset($_POST['getinfo']))
+if ($_POST['option'] == 'getinfo')
 {
     $query = '';
     if ($_POST['type'] == 'email')
@@ -22,7 +22,7 @@ if (isset($_POST['getinfo']))
     $statistic = $result->fetch_all(MYSQLI_ASSOC);
     echo json_encode($statistic);
 }
-else if (isset($_GET['services']))
+else if ($_GET['option'] == 'services')
 {
     $sql = "SELECT service_id id,service_name name, service_duration duration FROM services ";
     $result = $conn->query($sql);

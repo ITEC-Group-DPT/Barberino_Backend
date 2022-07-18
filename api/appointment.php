@@ -1,7 +1,7 @@
 <?php
 include  __DIR__ . '/../includes/header.php';
 
-if (isset($_POST['createappointment']))
+if ($_POST['option'] == 'createAppointment')
 {
     $arrName = explode(' ', trim($_POST['name']), 2);
     $firstName = $arrName[0];
