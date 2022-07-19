@@ -1,7 +1,7 @@
 <?php
 include  __DIR__ . '/../includes/header.php';
-
-if ($_POST['option'] == 'getinfo')
+    
+if (isset($_POST['option']) and $_POST['option'] == 'getinfo')
 {
     $query = '';
     if ($_POST['type'] == 'email')
@@ -22,14 +22,14 @@ if ($_POST['option'] == 'getinfo')
     $statistic = $result->fetch_all(MYSQLI_ASSOC);
     echo json_encode($statistic);
 }
-else if ($_GET['option'] == 'services')
+else if (isset($_GET['option']) and $_GET['option'] == 'services')
 {
     $sql = "SELECT service_id id,service_name name, service_duration duration FROM services ";
     $result = $conn->query($sql);
     $rows = $result->fetch_all(MYSQLI_ASSOC);
     echo json_encode($rows);
 }
-else if (isset($_GET['selected_services']))
+else if (isset($_GET['option']) and isset($_GET['selected_services']))
 {
     $returnarr=[];
     if ($_GET['option'] == "getDateTime")
@@ -110,13 +110,14 @@ function getTimeForDate($appointment_date)
 
     // $start = date("H:00");  //get time now by time zone
     // admin can book for guest (at time not present in list)
-    if (date("d-m-Y") <> $appointment_date or isset($_GET['admin']))
+    if (date("Y-m-d") <> $appointment_date or isset($_GET['admin']))
     {
         $start = $open_time;
     }
     else
     {
         $step = constant("nexttimestep") - (int)date("i") % constant("nexttimestep"); //next earliest timeslot from current (3)
+        if ($step < constant("nexttimestep")/2) $step = $step + constant("nexttimestep")/2;
         $start = date("H:i", strtotime(date("H:i")) + $step * 60);
     }
 
