@@ -21,7 +21,7 @@
         exit;
     }
 
-    function failApi($text){
+    function failApi($text=''){
         $response = [];
         $response['success'] = false;
         if (isset($text))  $response['data'] = $text;

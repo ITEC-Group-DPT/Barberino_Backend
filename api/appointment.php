@@ -49,6 +49,27 @@ if (isset($_POST['option']) and $_POST['option'] == 'createAppointment')
     $start_time = date("Y-m-d H:i", strtotime($_POST['selected_date']." ".$_POST['selected_time']) );
     $end_time = date("Y-m-d H:i", strtotime($start_time) +  $secs);
 
+    $stmt_testconflict = $conn->prepare("
+    SELECT *
+    from  appointments
+    where
+    appointments.employee_id = ?
+    and appointments.canceled = 0
+    and date(appointments.start_time) = date(?)
+    and ( (
+            ? >= appointments.start_time
+            or ? > appointments.start_time
+        )
+        and (
+            appointments.end_time_expected > ?
+            or appointments.end_time_expected >= ?
+        )
+        )"
+    );
+    $stmt_testconflict->execute(array($_POST['selected_employee'],$start_time,$start_time,$end_time,$start_time,$end_time));
+    $res = $stmt_testconflict->get_result();
+    if ($res->num_rows != 0) die("conflict");
+
     $stmt_appointment = $conn->prepare("insert into appointments(date_created, client_id, employee_id, start_time, end_time_expected ) values(?, ?, ?, ?, ?)");
     $stmt_appointment->execute(array(Date("Y-m-d H:i"),$userid,$_POST['selected_employee'],$start_time,$end_time));
     $appointment_id = $stmt_appointment->insert_id;

@@ -7,7 +7,7 @@
     $conn = new mysqli($host, $user, $pw, $db, $port);
     $conn_err = $conn->connect_errno;
     date_default_timezone_set('Asia/Saigon');
-    // $conn -> query("SET time_zone = '+07:00';");
+    $conn -> query("SET time_zone = '+07:00';");
 
 
     // if (date_default_timezone_get()) {

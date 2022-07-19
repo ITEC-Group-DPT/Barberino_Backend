@@ -1,6 +1,6 @@
 <?php
 include  __DIR__ . '/../includes/header.php';
-    
+
 if (isset($_POST['option']) and $_POST['option'] == 'getinfo')
 {
     $query = '';
@@ -31,7 +31,7 @@ else if (isset($_GET['option']) and $_GET['option'] == 'services')
 }
 else if (isset($_GET['option']) and isset($_GET['selected_services']))
 {
-    $returnarr=[];
+    $returnarr = [];
     if ($_GET['option'] == "getDateTime")
     {
         $appointment_date = date('Y-m-d');
@@ -59,17 +59,34 @@ else if (isset($_GET['option']) and isset($_GET['selected_services']))
 
     //$_GET['option'] == "getTimeByDate"
     $DateForTimeSlot = $_GET['option'] == "getTimeByDate" ? $_GET['appointmentDate'] : $availableDate[0];
+
     $timearr = getTimeForDate($DateForTimeSlot);
-    if ($_GET['option'] == "getDateTime"){
+
+    if ($_GET['option'] == "getDateTime")
+    {
+        if (count($timearr) == 0)
+        {
+            array_splice($availableDate,0,1);
+            array_push($availableDate, date("d-m-Y", strtotime($appointment_date)));
+            $returnarr['availableDates'] = $availableDate;
+            $timearr = getTimeForDate($availableDate[0]);
+        }
+       
         $returnarr["initTimeSlot"] = $timearr;
+       
     }
-    else {
+    else
+    {
         $returnarr = $timearr;
     }
-  
-    
+
+
     echo json_encode($returnarr);
     //get time for a day
+}
+else
+{
+    failApi();
 }
 
 
@@ -97,11 +114,10 @@ function getTimeForDate($appointment_date)
 
     //counttimeduration
 
-
-    define("nexttimestep", 30); //next latest time slot from now
-    define("timestep", 15); //booking time
-    $timestep = constant("timestep");
-
+    //const 
+    $nexttimestep = 30; //next latest time slot from now 
+    $timestep = 15; //booking time
+    //const 
 
     $appointment_date = date('Y-m-d', strtotime($appointment_date));
 
@@ -116,8 +132,8 @@ function getTimeForDate($appointment_date)
     }
     else
     {
-        $step = constant("nexttimestep") - (int)date("i") % constant("nexttimestep"); //next earliest timeslot from current (3)
-        if ($step < constant("nexttimestep")/2) $step = $step + constant("nexttimestep")/2;
+        $step = $nexttimestep - (int)date("i") % $nexttimestep; //next earliest timeslot from current (3)
+        if ($step < $nexttimestep / 2) $step = $step + $nexttimestep / 2;
         $start = date("H:i", strtotime(date("H:i")) + $step * 60);
     }
 
@@ -167,7 +183,7 @@ function getTimeForDate($appointment_date)
                 )
             ");
 
-            $stmt->bind_param("ssssssss",$startDatetime,$startDatetime, $endDatetime, $appointment_date, $startDatetime, $endDatetime, $startDatetime, $endDatetime);
+            $stmt->bind_param("ssssssss", $startDatetime, $startDatetime, $endDatetime, $appointment_date, $startDatetime, $endDatetime, $startDatetime, $endDatetime);
             $stmt->execute();
 
             $queryres = $stmt->get_result();
