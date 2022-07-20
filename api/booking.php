@@ -153,11 +153,11 @@ function getTimeForDate($appointment_date)
             //weekday return 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday. but the database store monday = 1 so need +1
 
 
-            $stmt = $conn->prepare("
+            $stmt1 = $conn->prepare("
             SELECT
-            employees.employee_id id,
-            employees.first_name firstname,
-            employees.last_name lastname
+                employees.employee_id id,
+                employees.first_name firstname,
+                employees.last_name lastname
             FROM employees, employees_schedule
             where employees.employee_id = employees_schedule.employee_id
             and employees_schedule.day_id = weekday(date(?))+1 and 
@@ -183,10 +183,10 @@ function getTimeForDate($appointment_date)
                 )
             ");
 
-            $stmt->bind_param("ssssssss", $startDatetime, $startDatetime, $endDatetime, $appointment_date, $startDatetime, $endDatetime, $startDatetime, $endDatetime);
-            $stmt->execute();
+            $stmt1->bind_param("ssssssss", $startDatetime, $startDatetime, $endDatetime, $startDatetime, $startDatetime, $endDatetime, $startDatetime, $endDatetime);
+            $stmt1->execute();
 
-            $queryres = $stmt->get_result();
+            $queryres = $stmt1->get_result();
 
             if ($queryres->num_rows != 0)
             {
@@ -201,7 +201,7 @@ function getTimeForDate($appointment_date)
         $start =  date('H:i', $start);
 
         $secs = strtotime($sum_duration) - strtotime("00:00:00");
-        $result = date("H:i", strtotime($start) + $secs);
+        $estimatedEndtime = date("H:i", strtotime($start) + $secs);
     }
     return $timearr;
 }

@@ -11,9 +11,10 @@
 -- FROM employees_schedule
 -- where day_id = 8
 -- having COUNT(*) > 0;
-SET @bd = '2022-07-19 08:30:00';
+SET time_zone = '+07:00';
+SET @bd = '2022-07-21 13:00:00';
 
-set @kt = '2022-07-19 08:45:00';
+set @kt = '2022-07-21 13:15:00';
 
 SELECT
     employees.employee_id id,
