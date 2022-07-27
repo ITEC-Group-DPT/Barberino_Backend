@@ -72,7 +72,7 @@ else if (isset($_GET['option']) and isset($_GET['selected_services']))
             $timearr = getTimeForDate($availableDate[0]);
         }
        
-        $returnarr["initTimeSlot"] = $timearr;
+        $returnarr["timeSlot"] = $timearr;
        
     }
     else
