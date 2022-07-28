@@ -2,37 +2,49 @@
 include  __DIR__ . '/../includes/header.php';
 if (isset($_GET["option"]))
 {
-    if ($_GET["option"] == "appointments")
+    if ($_GET["option"] == "appointments" or $_GET['option'] == 'getPages')
     {
-        $offset = 4 * ($_GET['page'] - 1);
         $limit = 4;
         $delaytime = "15 MINUTE";
-        $limitStr = " Limit {$offset}, {$limit}";
 
         if ($_GET['sortby'] == 'allbooking')
         {
-            $query = " ORDER BY appointments.start_time desc " . $limitStr;
+            $query = " ORDER BY appointments.start_time desc ";
         }
         else if ($_GET['sortby'] == 'ongoing')
         {
             $query = " and appointments.canceled = 0
-            and appointments.start_time >= DATE_SUB(now(), INTERVAL {$delaytime})  ORDER BY appointments.start_time " . $limitStr;
+            and appointments.start_time >= DATE_SUB(now(), INTERVAL {$delaytime})  ORDER BY appointments.start_time ";
         }
         else if ($_GET['sortby'] == 'complete')
         {
-            $query = " and appointments.canceled = 2
-            ORDER BY appointments.start_time desc " . $limitStr;
+            $query = " and appointments.canceled = -1
+            ORDER BY appointments.start_time desc ";
         }
         else if ($_GET['sortby'] == 'overdue')
         {
             $query = " and appointments.canceled = 0
-            and appointments.start_time < DATE_SUB(now(), INTERVAL {$delaytime})  ORDER BY appointments.start_time desc" . $limitStr;
+            and appointments.start_time < DATE_SUB(now(), INTERVAL {$delaytime})  ORDER BY appointments.start_time desc";
         }
         else if ($_GET['sortby'] == 'cancelled')
         {
             $query = " and appointments.canceled = 1
-            ORDER BY appointments.start_time desc" . $limitStr;
+            ORDER BY appointments.start_time desc";
         }
+
+        if ($_GET['option'] == 'getPages')
+        {
+            $result = $conn->query("SELECT ceil(count(*)*1.0/{$limit}) totalPages from appointments where 1 {$query}");
+            $arr = mysqli_fetch_all($result, MYSQLI_ASSOC);
+            $res = $arr[0];
+            echo json_encode($res);
+            exit;
+        }
+        
+        $offset = 4 * ($_GET['page'] - 1);
+        $limitStr = " Limit {$offset}, {$limit}";
+        $query = $query . $limitStr;
+
 
         $sql = "SELECT
         appointments.appointment_id id,
@@ -51,7 +63,8 @@ if (isset($_GET["option"]))
             employees.last_name
         ) empName,
         Case 
-            when appointments.canceled = 1 then 'cancelled'
+            when appointments.canceled = 1 then 'cancelled' 
+            when appointments.canceled = -1 then 'complete'
             when appointments.start_time >= DATE_SUB(now(), INTERVAL {$delaytime}) then 'ongoing'
             else 'overdue'
         end as status
@@ -99,6 +112,7 @@ if (isset($_GET["option"]))
                     count(if(appointments.canceled = 1 ,1 ,NUll)) 'Cancelled',
                     count(if(appointments.canceled = 0 and appointments.start_time >= DATE_SUB(now(), INTERVAL 15 MINUTE),1 ,NUll)) 'Ongoing',
                     count(if(appointments.canceled = 0 and appointments.start_time < DATE_SUB(now(), INTERVAL 15 MINUTE),1 ,NUll)) 'Overdue',
+                    count(if(appointments.canceled = -1 ,1 ,NUll)) 'Complete',
                     count(*) 'Total'
                 FROM
                     appointments
@@ -120,9 +134,12 @@ else if (isset($_POST["option"]))
 {
     if ($_POST['option'] = 'changeStatus')
     {
-        if ($_POST['status'] == 'complete'){
+        if ($_POST['status'] == 'complete')
+        {
             $status = -1;
-        }elseif ($_POST['status'] == 'cancel') {
+        }
+        elseif ($_POST['status'] == 'cancel')
+        {
             $status = 1;
         }
         $sql = "UPDATE appointments SET canceled = {$status} WHERE appointment_id = {$_POST['id']};";

@@ -121,7 +121,7 @@ ORDER BY
 --     and services_booked.appointment_id = 85
 
 SELECT
-    appointments.appointment_id id,
+    SQL_CALC_FOUND_ROWS *, appointments.appointment_id as id,
     CONCAT(
         clients.first_name,
         ' ',
@@ -138,7 +138,7 @@ SELECT
     ) empName,
     Case
         when appointments.canceled = 1 then 'cancelled'
-        when appointments.start_time >= DATE_SUB(now(), INTERVAL 15 MINUTE) then 'ongoing'
+        when appointments.start_time >= DATE_SUB(now(), INTERVAL 30 minute) then 'ongoing'
         else 'overdue'
     end as status
 FROM
@@ -149,15 +149,35 @@ WHERE
     clients.client_id = appointments.client_id
     and employees.employee_id = appointments.employee_id
 ORDER BY
-    appointments.start_time
+    appointments.start_time desc
 LIMIT 4;
+SELECT FOUND_ROWS();
 
 SELECT
-    count(if(appointments.canceled = 1 ,1 ,NUll)) 'Cancelled',
-   count(if(appointments.canceled = 0 and appointments.start_time >= DATE_SUB(now(), INTERVAL 15 MINUTE),1 ,NUll)) 'Ongoing',
-   count(if(appointments.canceled = 0 and appointments.start_time < DATE_SUB(now(), INTERVAL 15 MINUTE),1 ,NUll)) 'Overdue',
-   count(*) 'Total'
-FROM
-    appointments;
+    count(
+        if(
+            appointments.canceled = 1,
+            1,
+            NUll
+        )
+    ) 'Cancelled',
+    count(
+        if(
+            appointments.canceled = 0
+            and appointments.start_time >= DATE_SUB(now(), INTERVAL 15 MINUTE),
+            1,
+            NUll
+        )
+    ) 'Ongoing',
+    count(
+        if(
+            appointments.canceled = 0
+            and appointments.start_time < DATE_SUB(now(), INTERVAL 15 MINUTE),
+            1,
+            NUll
+        )
+    ) 'Overdue',
+    count(*) 'Total'
+FROM appointments;
 
 UPDATE appointments SET canceled = 1 WHERE appointment_id = 12;
