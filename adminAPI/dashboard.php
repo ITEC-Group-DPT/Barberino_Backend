@@ -7,26 +7,26 @@ if (isset($_GET["option"]))
         $limit = 4;
         $delaytime = "15 MINUTE";
 
-        if ($_GET['sortby'] == 'allbooking')
+        if ($_GET['sortby'] == 'All Booking')
         {
             $query = " ORDER BY appointments.start_time desc ";
         }
-        else if ($_GET['sortby'] == 'ongoing')
+        else if ($_GET['sortby'] == 'Ongoing')
         {
             $query = " and appointments.canceled = 0
             and appointments.start_time >= DATE_SUB(now(), INTERVAL {$delaytime})  ORDER BY appointments.start_time ";
         }
-        else if ($_GET['sortby'] == 'complete')
+        else if ($_GET['sortby'] == 'Completed')
         {
             $query = " and appointments.canceled = -1
             ORDER BY appointments.start_time desc ";
         }
-        else if ($_GET['sortby'] == 'overdue')
+        else if ($_GET['sortby'] == 'Overdue')
         {
             $query = " and appointments.canceled = 0
             and appointments.start_time < DATE_SUB(now(), INTERVAL {$delaytime})  ORDER BY appointments.start_time desc";
         }
-        else if ($_GET['sortby'] == 'cancelled')
+        else if ($_GET['sortby'] == 'Cancelled')
         {
             $query = " and appointments.canceled = 1
             ORDER BY appointments.start_time desc";
@@ -54,7 +54,6 @@ if (isset($_GET["option"]))
             clients.last_name
         ) cusName,
         clients.phone_number phoneNum,
-        appointments.date_created dateCreated,
         appointments.start_time startDate,
         appointments.end_time_expected endDate,
         concat(
@@ -63,10 +62,10 @@ if (isset($_GET["option"]))
             employees.last_name
         ) empName,
         Case 
-            when appointments.canceled = 1 then 'cancelled' 
-            when appointments.canceled = -1 then 'complete'
-            when appointments.start_time >= DATE_SUB(now(), INTERVAL {$delaytime}) then 'ongoing'
-            else 'overdue'
+            when appointments.canceled = 1 then 'Cancelled' 
+            when appointments.canceled = -1 then 'Completed'
+            when appointments.start_time >= DATE_SUB(now(), INTERVAL {$delaytime}) then 'Ongoing'
+            else 'Overdue'
         end as status
         FROM
         appointments,
@@ -112,7 +111,7 @@ if (isset($_GET["option"]))
                     count(if(appointments.canceled = 1 ,1 ,NUll)) 'Cancelled',
                     count(if(appointments.canceled = 0 and appointments.start_time >= DATE_SUB(now(), INTERVAL 15 MINUTE),1 ,NUll)) 'Ongoing',
                     count(if(appointments.canceled = 0 and appointments.start_time < DATE_SUB(now(), INTERVAL 15 MINUTE),1 ,NUll)) 'Overdue',
-                    count(if(appointments.canceled = -1 ,1 ,NUll)) 'Complete',
+                    count(if(appointments.canceled = -1 ,1 ,NUll)) 'Completed',
                     count(*) 'Total'
                 FROM
                     appointments
@@ -134,15 +133,15 @@ else if (isset($_POST["option"]))
 {
     if ($_POST['option'] = 'changeStatus')
     {
-        if ($_POST['status'] == 'complete')
+        if ($_POST['status'] == 'Completed')
         {
             $status = -1;
         }
-        elseif ($_POST['status'] == 'cancel')
+        elseif ($_POST['status'] == 'Cancelled')
         {
             $status = 1;
         }
-        $sql = "UPDATE appointments SET canceled = {$status} WHERE appointment_id = {$_POST['id']};";
+        $sql = "UPDATE appointments SET appointments.canceled = {$status} WHERE appointments.canceled = 0 and appointment_id = {$_POST['id']}";
         $result = $conn->query($sql);
         echo "success";
     }

@@ -180,4 +180,4 @@ SELECT
     count(*) 'Total'
 FROM appointments;
 
-UPDATE appointments SET canceled = 1 WHERE appointment_id = 12;
+UPDATE appointments SET appointments.canceled = 0 
